@@ -1,3 +1,5 @@
+<p align="center"><img src="https://raw.githubusercontent.com/go-birdsite/brand/main/social/go-birdsite.png" alt="go-birdsite/twitter" width="720"></p>
+
 # go-birdsite / twitter
 
 [![CI](https://github.com/go-birdsite/twitter/actions/workflows/ci.yml/badge.svg)](https://github.com/go-birdsite/twitter/actions/workflows/ci.yml)
