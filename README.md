@@ -12,19 +12,47 @@ that powers embedded timeline widgets and extracts tweets from the
 `__NEXT_DATA__` JSON blob.
 
 ```go
-c := twitter.New()
+c := twitter.New(twitter.WithHTTPClient(browserhttp.NewClient(30 * time.Second)))
 tl, err := c.UserTweets(context.Background(), "jack")
 for _, tw := range tl.Tweets {
-    fmt.Printf("@%s: %s (%d likes)\n", tw.Author, tw.Text, tw.Likes)
+    o := tw.Original() // the retweeted tweet for a retweet, else tw itself
+    fmt.Printf("@%s (%s): %s (%d likes)\n", o.User.ScreenName, o.User.Name, o.ExpandedText(), o.Likes)
+    for _, m := range o.Media {
+        if v, ok := m.BestVariant(); ok {
+            fmt.Printf("  video %dx%d: %s\n", m.Width, m.Height, v.URL)
+        }
+    }
 }
 ```
+
+## 🔑 Use a browser-fingerprinting HTTP client
+
+The endpoint answers **429 to Go's stock `net/http` even when the account's
+quota is untouched** — it fingerprints the TLS/HTTP2 handshake, not the
+User-Agent. `curl` gets a 200 from the same IP with the same User-Agent in the
+same second. Pass a fingerprinting client such as
+[go-browserhttp](https://github.com/go-browserhttp/browserhttp) via
+`WithHTTPClient` for anything beyond a one-shot read. That refusal is reported
+as `ErrFingerprinted`, distinct from `ErrNotFound` (unknown account) and
+`ErrProtected` (non-public account), so callers can say what actually happened
+instead of blaming a missing token.
+
+## What a tweet carries
+
+Author (handle, display name, avatar, bio, verified, followers) · full text ·
+`ExpandedText()` with every `t.co` resolved · `Links` (short/expanded/display) ·
+`PrimaryLink()`, the first destination that is not Twitter/X itself · photos and
+videos with alt text, pixel size, duration and every encoding, plus
+`BestVariant()` for the highest-bitrate progressive MP4 · retweets (`Retweeted`,
+`Original()`) and quotes (`Quoted`) · like/retweet/reply/quote counts · language
+and sensitivity flags.
 
 ## ⚠️ Fragility & Terms of Service
 
 This is inherently fragile. Twitter/X changes and locks these endpoints, and
-many profiles or rate states require a valid auth token (`WithAuthToken`).
-Blocked requests (403/429) surface as errors. Respect Twitter/X's Terms of
-Service and applicable law when using this library.
+some profiles or rate states require a valid auth token (`WithAuthToken`).
+Blocked requests surface as errors. Respect Twitter/X's Terms of Service and
+applicable law when using this library.
 
 ## License
 
