@@ -61,6 +61,23 @@ type Client struct {
 	UserAgent string
 	// AuthToken, when set, is sent as a bearer token for authenticated reads.
 	AuthToken string
+
+	// The fields below configure the private GraphQL API used by
+	// [Client.Following]; they do not affect the public syndication reads above.
+
+	// APIBaseURL is the GraphQL origin; defaults to [DefaultAPIBaseURL].
+	APIBaseURL string
+	// SessionAuthToken is the logged-in "auth_token" cookie the Following call
+	// authenticates with.
+	SessionAuthToken string
+	// CSRFToken is the logged-in "ct0" cookie, sent as the ct0 cookie and the
+	// x-csrf-token header on the Following call.
+	CSRFToken string
+	// Bearer overrides the web-app bearer token; defaults to [DefaultWebBearer].
+	Bearer string
+	// FollowingQueryID overrides the Following GraphQL query id; defaults to
+	// [DefaultFollowingQueryID].
+	FollowingQueryID string
 }
 
 // Option configures a Client.
@@ -77,6 +94,26 @@ func WithUserAgent(ua string) Option { return func(c *Client) { c.UserAgent = ua
 
 // WithAuthToken sets an optional bearer token for authenticated reads.
 func WithAuthToken(t string) Option { return func(c *Client) { c.AuthToken = t } }
+
+// WithAPIBaseURL overrides the GraphQL origin used by [Client.Following] (used
+// in tests).
+func WithAPIBaseURL(u string) Option {
+	return func(c *Client) { c.APIBaseURL = strings.TrimRight(u, "/") }
+}
+
+// WithSessionCookies sets the logged-in auth_token + ct0 cookies that
+// [Client.Following] authenticates with.
+func WithSessionCookies(authToken, csrf string) Option {
+	return func(c *Client) { c.SessionAuthToken, c.CSRFToken = authToken, csrf }
+}
+
+// WithBearer overrides the web-app bearer token sent on the Following call.
+func WithBearer(token string) Option { return func(c *Client) { c.Bearer = token } }
+
+// WithFollowingQueryID overrides the Following GraphQL query id.
+func WithFollowingQueryID(id string) Option {
+	return func(c *Client) { c.FollowingQueryID = id }
+}
 
 // New returns a Client with sane defaults.
 func New(opts ...Option) *Client {
