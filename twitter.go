@@ -78,6 +78,12 @@ type Client struct {
 	// FollowingQueryID overrides the Following GraphQL query id; defaults to
 	// [DefaultFollowingQueryID].
 	FollowingQueryID string
+	// UserByScreenNameQueryID overrides the UserByScreenName GraphQL query id;
+	// defaults to [DefaultUserByScreenNameQueryID].
+	UserByScreenNameQueryID string
+	// UserTweetsQueryID overrides the UserTweets GraphQL query id; defaults to
+	// [DefaultUserTweetsQueryID].
+	UserTweetsQueryID string
 }
 
 // Option configures a Client.
@@ -113,6 +119,16 @@ func WithBearer(token string) Option { return func(c *Client) { c.Bearer = token
 // WithFollowingQueryID overrides the Following GraphQL query id.
 func WithFollowingQueryID(id string) Option {
 	return func(c *Client) { c.FollowingQueryID = id }
+}
+
+// WithUserByScreenNameQueryID overrides the UserByScreenName GraphQL query id.
+func WithUserByScreenNameQueryID(id string) Option {
+	return func(c *Client) { c.UserByScreenNameQueryID = id }
+}
+
+// WithUserTweetsQueryID overrides the UserTweets GraphQL query id.
+func WithUserTweetsQueryID(id string) Option {
+	return func(c *Client) { c.UserTweetsQueryID = id }
 }
 
 // New returns a Client with sane defaults.
