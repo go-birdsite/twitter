@@ -10,8 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     env: { CGO_ENABLED: "0", GOWORK: "off" }
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with: { go-version: "1.26.4" }
       - run: go vet ./...
       - run: go test -covermode=set -coverprofile=cover.out ./...
@@ -36,8 +36,8 @@ jobs:
           - { goos: darwin, goarch: arm64 }
           - { goos: windows, goarch: amd64 }
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with: { go-version: "1.26.4" }
       - env: { GOOS: "${{ matrix.target.goos }}", GOARCH: "${{ matrix.target.goarch }}" }
         run: go build ./...
